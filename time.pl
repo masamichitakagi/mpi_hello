@@ -29,8 +29,11 @@ foreach (@lines) {
     if($_ =~ /\[$rank\] (PMI_Init) ([0-9\.]+)/) {
         printf(",,,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->PMI_Init()
     }
-    if($_ =~ /\[$rank\] (provider_init|av_insert|shm_posix_init)\S+ ([0-9\.]+)/) {
+    if($_ =~ /\[$rank\] (provider_init1|av_insert|shm_posix_init)\S+ ([0-9\.]+)/) {
         printf(",,,,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()->stmts
+    }
+    if($_ =~ /\[$rank\] (provider_init2)\S+ ([0-9\.]+)/) {
+        printf(",,,,,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()->block->stmts
     }
     if($_ =~ /\[$rank\] MPIDI_(NM|SHM)_mpi_init_hook ([0-9\.]+)/) {
         printf(",,,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()
