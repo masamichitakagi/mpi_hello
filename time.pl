@@ -1,26 +1,53 @@
 #!/usr/bin/perl
 
 $rank = 0;
-while(<>) {
-    if($_ =~ /Before-mpiexec ([0-9\.]+)/) { $before_mpiexec = $1; #print $1."bm\n";
+@lines = <>;
+foreach (@lines) {
+    if($_ =~ /Before-mpiexec ([0-9\.]+)/) {
+        $before_mpiexec = $1; #print $1."bm\n";
     }
-    if($_ =~ /After-mpiexec ([0-9\.]+)/) { $after_mpiexec = $1; #print $1."am\n";
+    if($_ =~ /\[$rank\] Before-MPI_Init ([0-9\.]+)/) {
+        $before_mpi_init = $1; #print $1."bi\n";
     }
-    if($_ =~ /\[$rank\] Before-MPI_Init ([0-9\.]+)/) { $before_mpi_init = $1; #print $1."bi\n";
+    if($_ =~ /\[$rank\] After-MPI_Finalize ([0-9\.]+)/) {
+        $after_mpi_finalize = $1; #print $1."af\n";
+    }
+    if($_ =~ /After-mpiexec ([0-9\.]+)/) {
+        $after_mpiexec = $1; #print $1."am\n";
+    }
+    if($_ =~ /real\s+([0-9]+)m([0-9\.]+)s/) {
+        $real_min = $1; $real_sec = $2; #print "$1m$2s\n";
+    }
 }
-    if($_ =~ /\[$rank\] After-MPI_Init ([0-9\.]+)/) { $after_mpi_init = $1; #print $1."ai\n";
+
+printf(",%f\n",  $before_mpi_init - $before_mpiexec); # process launch
+
+foreach (@lines) {
+    if($_ =~ /\[$rank\] (MPII_Comm_init) ([0-9\.]+)/) {
+        printf(",,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPII_Comm_init
+    }
+    if($_ =~ /\[$rank\] (PMI_Init) ([0-9\.]+)/) {
+        printf(",,,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->PMI_Init()
+    }
+    if($_ =~ /\[$rank\] (provider_init|av_insert|shm_posix_init)\S+ ([0-9\.]+)/) {
+        printf(",,,,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()->stmts
+    }
+    if($_ =~ /\[$rank\] MPIDI_(NM|SHM)_mpi_init_hook ([0-9\.]+)/) {
+        printf(",,,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()
+    }
+    if($_ =~ /\[$rank\] (MPID_Init) ([0-9\.]+)/) {
+        printf(",,,%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()
+    }
+    if($_ =~ /\[$rank\] (MPIR_Init_thread) ([0-9\.]+)/) {
+        printf(",,%f\n", $2); # MPI_Init()->MPIR_Init_thread()
+    }
+    if($_ =~ /\[$rank\] (MPID_Finalize) ([0-9\.]+)/) {
+        printf(",,%f\n", $2); # MPI_Finalize()->MPID_Finalize()
+    }
+    if($_ =~ /\[$rank\] (MPI_Finalize\S+) ([0-9\.]+)/) {
+        printf(",,%f\n", $2); # MPI_Finalize()->stmts
+    }
 }
-    if($_ =~ /\[$rank\] Before-MPI_Finalize ([0-9\.]+)/) { $before_mpi_finalize = $1; #print $1."bf\n";
-}
-    if($_ =~ /\[$rank\] After-MPI_Finalize ([0-9\.]+)/) { $after_mpi_finalize = $1; #print $1."af\n";
-}
-    if($_ =~ /real\s+([0-9]+)m([0-9\.]+)s/) { $real_min = $1; $real_sec = $2; #print "$1m$2s\n";
-}
-    if($_ =~ /\[$rank\] shm_seg_commit ([0-9\.]+)/) { $shm_seg_commit = $1; #print $1."s\n";
-}
-    if($_ =~ /\[$rank\] PMI_KVS_Get ([0-9\.]+)/) { $pmi_kvs_get = $1; #print $1."g\n";
-}
-}
-printf("%f %f %f %f %f %f %f\n", $real_min*60+$real_sec, $before_mpi_init - $before_mpiexec, $after_mpi_init - $before_mpi_init, 
-       $shm_seg_commit, $pmi_kvs_get, $after_mpi_finalize - $before_mpi_finalize,
-    $after_mpiexec - $after_mpi_finalize);
+
+printf(",%f\n",  $after_mpiexec - $after_mpi_finalize);
+printf("%f\n", $real_min*60+$real_sec);
