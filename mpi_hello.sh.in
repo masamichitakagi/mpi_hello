@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#PJM -L rscgrp=@rg@
+#PJM -L node=@nnodes@
+#PJM -L elapse=@limit@
+#PJM --mpi proc=@nprocs@
+#PJM -g gg10
+#PJM -j
+
+
+perl /work/0/gg10/e29005/project/src/tools/ppn.pl @nprocs@ @nnodes@ ${PJM_O_NODEINF} > ./hostfile
+
+export HYDRA_BOOTSTRAP_EXEC=/bin/pjrsh
+export HYDRA_BOOTSTRAP=rsh
+export MPIR_CVAR_OFI_USE_PROVIDER=psm2
+
+echo Before-mpiexec `./gettimeofday`
+time @mpiexec@ -l -machinefile ./hostfile ./@jobname@
+echo After-mpiexec `./gettimeofday`
