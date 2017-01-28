@@ -7,7 +7,7 @@ use File::Basename;
 %rg = (
     'opt', 'regular-flat',
     'old', 'regular-flat',
-    'prof', 'regular-flat',
+    'prof', 'debug-flat',
     'intel', 'regular-flat',
     );
 
@@ -42,9 +42,9 @@ use File::Basename;
 '64', '00:10:00',
 '128', '00:10:00',
 '256', '00:10:00',
-'512', '00:10:00',
-'1024', '00:10:00',
-'2048', '00:30:00',
+'512', '00:20:00',
+'1024', '00:45:00',
+'2048', '01:30:00',
     );
 
 $dir=$ARGV[2].'_'.$ARGV[0].'_'.$ARGV[1].'_'.`date +%Y%m%d_%H%M%S`;

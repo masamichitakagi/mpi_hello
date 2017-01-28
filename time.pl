@@ -50,6 +50,9 @@ foreach (@lines) {
     if($_ =~ /\[$rank\] (MPI_Finalize\S+) ([0-9\.]+)/) {
         printf(",,%f\n", $2); # MPI_Finalize()->stmts
     }
+    if($_ =~ /\[$rank\] (MPI_Finalize|MPI_Init) ([0-9\.]+)/) {
+        printf(",%f\n", $2); # MPI_Init()|MPI_Finalize()
+    }
 }
 
 printf(",%f\n",  $after_mpiexec - $after_mpi_finalize);
