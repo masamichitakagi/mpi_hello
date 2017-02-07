@@ -3,7 +3,7 @@
 
 CWD := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
-CC = /work/0/gg10/e29005/project/mpich/install/bin/mpicc
+CC = /work/0/gg10/e29005/project/mpich/install$(PF)/bin/mpicc
 #CC = mpiicc
 
 OPTNPROCS = -n

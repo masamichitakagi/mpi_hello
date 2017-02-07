@@ -5,30 +5,42 @@ use File::Basename;
 @fn = split /\./, $command[0];
 
 %rg = (
-    'opt', 'regular-flat',
-    'old', 'regular-flat',
+    'opt', 'debug-flat',
+    'old', 'debug-flat',
     'prof', 'debug-flat',
-    'intel', 'regular-flat',
+    'prof_mid', 'debug-flat',
+    'prof_prev', 'debug-flat',
+    'manyconn', 'debug-flat',
+    'intel', 'debug-flat',
     );
 
 %mpicc = (
     'opt', '/work/0/gg10/e29005/project/mpich/install_opt/bin/mpicc',
     'old', '/work/0/gg10/e29005/project/mpich/install_old/bin/mpicc',
-    'prof', '/work/0/gg10/e29005/project/mpich/install/bin/mpicc',
+    'prof', '/work/0/gg10/e29005/project/mpich/install_prof/bin/mpicc',
+    'prof_mid', '/work/0/gg10/e29005/project/mpich/install_prof_mid/bin/mpicc',
+    'prof_prev', '/work/0/gg10/e29005/project/mpich/install_prof_prev/bin/mpicc',
+    'manyconn', '/work/0/gg10/e29005/project/mpich/install_manyconn/bin/mpicc',
     'intel', 'mpiicc',
     );
 
 %mpiexec = (
     'opt', '/work/0/gg10/e29005/project/mpich/install_opt/bin/mpiexec.hydra',
     'old', '/work/0/gg10/e29005/project/mpich/install_old/bin/mpiexec.hydra',
-    'prof', '/work/0/gg10/e29005/project/mpich/install/bin/mpiexec.hydra',
+    'prof', '/work/0/gg10/e29005/project/mpich/install_prof/bin/mpiexec.hydra',
+    'prof_mid', '/work/0/gg10/e29005/project/mpich/install_prof_mid/bin/mpiexec.hydra',
+    'prof_prev', '/work/0/gg10/e29005/project/mpich/install_prof_prev/bin/mpiexec.hydra',
+    'manyconn', '/work/0/gg10/e29005/project/mpich/install_manyconn/bin/mpiexec.hydra',
     'intel', 'mpiexec.hydra',
     );
 
 %prof = (
     'opt', '',
     'old', '',
-    'prof', '-DPROF=1',
+    'prof', '',
+    'prof_mid', '',
+    'prof_prev', '',
+    'manyconn', '',
     'intel', '',
     );
 
@@ -39,12 +51,12 @@ use File::Basename;
 '8', '00:10:00',
 '16', '00:10:00',
 '32', '00:10:00',
-'64', '00:10:00',
-'128', '00:10:00',
+'64', '00:05:00',
+'128', '00:05:00',
 '256', '00:10:00',
-'512', '00:20:00',
-'1024', '00:45:00',
-'2048', '01:30:00',
+'512', '00:15:00',
+'1024', '00:15:00',
+'2048', '00:30:00',
     );
 
 $dir=$ARGV[2].'_'.$ARGV[0].'_'.$ARGV[1].'_'.`date +%Y%m%d_%H%M%S`;

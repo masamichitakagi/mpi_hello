@@ -7,28 +7,29 @@
 #include <sys/time.h>
 
 int main(int argc, char** argv) {
-  int nproc, rank, ierr;
-  struct timeval tv;
+  int nproc, rank, ierr, pmi_rank;
+  struct timeval tv_start, tv_stop;
+  char* buf = (char*)malloc(1024*1024*128);
+  setvbuf(stdout, buf, _IOFBF, 1024*1024*128);
 
-  //printf("[%d]hello\n", getpid()); fflush(stdout);
-  //system("uname -n");
-
-#ifdef PROF
-  gettimeofday(&tv, NULL);
-  printf("Before-MPI_Init %ld.%ld\n", tv.tv_sec, tv.tv_usec);
-#endif
+  pmi_rank = atoi(getenv("PMI_RANK"));
+  gettimeofday(&tv_start, NULL);
+  if(pmi_rank == 0) printf("Before-MPI_Init %ld.%ld\n", tv_start.tv_sec, tv_start.tv_usec);
   ierr = MPI_Init(&argc, &argv);
+  gettimeofday(&tv_stop, NULL);
+  if(pmi_rank == 0) printf("main-MPI_Init %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
 
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &nproc);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  //printf("rank=%d,nproc=%d\n", rank, nproc);
-
+  gettimeofday(&tv_start, NULL);
   MPI_Finalize();
-#ifdef PROF
-  gettimeofday(&tv, NULL);
-  printf("After-MPI_Finalize %ld.%ld\n", tv.tv_sec, tv.tv_usec);
-#endif
+  gettimeofday(&tv_stop, NULL);
+  if(pmi_rank == 0) printf("main-MPI_Finalize %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+
+  gettimeofday(&tv_start, NULL);
+  if(pmi_rank == 0) printf("After-MPI_Finalize %ld.%ld\n", tv_start.tv_sec, tv_start.tv_usec);
+  fflush(stdout);
 
  fn_exit:
   return 0;
