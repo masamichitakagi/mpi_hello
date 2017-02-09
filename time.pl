@@ -28,7 +28,13 @@ foreach (@lines) {
 	$ts = $2;
         push @time_bcast, $time;
 	push @ts_bcast, $ts;
-	$i_bcast++;
+	#print $time.' '.$ts."\n";
+    }
+    if($_ =~ /put_sum ([0-9\.]+) ([0-9\.]+)/) {
+	$time = $1;
+	$ts = $2;
+        push @time_put_sum, $time;
+	push @ts_put_sum, $ts;
 	#print $time.' '.$ts."\n";
     }
 }
@@ -43,20 +49,33 @@ foreach (@lines) {
     if($_ =~ /\[$rank\] (PMI_Init) ([0-9\.]+)/) {
         printf("${delim}${delim}${delim}${delim}%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->PMI_Init()
     }
-    if($_ =~ /\[$rank\] (av_insert-shm_seg_commit|av_insert-PMI_Barrier|shm_posix_init-shm_seg_commit) ([0-9\.]+) ([0-9\.]+)/) {
+    if($_ =~ /\[$rank\] (av_insert-PMI_Barrier|shm_seg_commit-PMI_Barrier) ([0-9\.]+) ([0-9\.]+)/) {
+	$section = $1;
+	$ndelim = $section eq 'av_insert-PMI_Barrier' ? 5 : 6;
 	$time_bar = $2;
 	$ts_bar = $3;
 	#print 'ts_bar='.$ts_bar.' ts_bcast='.$ts_bcast[0].' time_bcast='.$time_bcast[0].' #ts_bcast='.$#ts_bcast."\n";
+
+	$time = 0;
+	if($#ts_put_sum >= 0 && $ts_put_sum[0] < $ts_bar) {
+	    $time = shift(@time_put_sum);
+	    shift(@ts_put_sum);
+	}
+	foreach (1..($ndelim+1)) { print $delim; } printf("%f\n", $time);
+
 	$time = 0;
 	if($#ts_bcast >= 0 && $ts_bcast[0] < $ts_bar) {
 	    $time = shift(@time_bcast);
 	    shift(@ts_bcast);
 	}
-	printf("${delim}${delim}${delim}${delim}${delim}${delim}%f\n", $time);
-        printf("${delim}${delim}${delim}${delim}${delim}%f\n", $time_bar); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()->stmts
+	foreach (1..($ndelim+1)) { print $delim; } printf("%f\n", $time);
+
+        foreach (1..$ndelim) { print $delim; } printf("%f\n", $time_bar); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()->stmts
     } elsif($_ =~ /\[$rank\] (provider_init1|av_insert|shm_posix_init)\S+ ([0-9\.]+)/) {
         printf("${delim}${delim}${delim}${delim}${delim}%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()->stmts
-    }
+    } elsif($_ =~ /\[$rank\] (shm_seg_commit)\S+ ([0-9\.]+)/) {
+        foreach (1..6) { print $delim; } printf("%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()->shm_seg_commit()->stmts
+    } 
     if($_ =~ /\[$rank\] (provider_init2)\S+ ([0-9\.]+)/) {
         printf("${delim}${delim}${delim}${delim}${delim}${delim}%f\n", $2); # MPI_Init()->MPIR_Init_thread()->MPID_Init()->MPIDI_(NM|SHM)_mpi_init_hook()->block->stmts
     }

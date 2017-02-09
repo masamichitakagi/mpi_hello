@@ -8,7 +8,7 @@
 #PJM -j
 
 
-perl /work/0/gg10/e29005/project/src/tools/ppn.pl @nprocs@ @nnodes@ ${PJM_O_NODEINF} > ./hostfile
+cat ${PJM_O_NODEINF} > ./hostfile
 
 export HYDRA_BOOTSTRAP_EXEC=/bin/pjrsh
 export HYDRA_BOOTSTRAP=rsh
@@ -16,5 +16,5 @@ export MPIR_CVAR_OFI_USE_PROVIDER=psm2
 export HYDRA_PROXY_RETRY_COUNT=30
 
 echo Before-mpiexec `./gettimeofday`
-time @mpiexec@ -l -machinefile ./hostfile ./@jobname@
+time @mpiexec@ -l -ppn 64 -machinefile ${PJM_O_NODEINF} ./@jobname@
 echo After-mpiexec `./gettimeofday`

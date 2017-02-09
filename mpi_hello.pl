@@ -14,6 +14,7 @@ $prefix = '/work/0/gg10/e29005/project/mpich/install';
 $post_mpicc = '/bin/mpicc';
 
 %mpicc = (
+    'debug', $prefix.'_debug'.$post_mpicc,
     'opt', $prefix.'_opt'.$post_mpicc,
     'old', $prefix.'_old'.$post_mpicc,
     'prof', $prefix.'_prof'.$post_mpicc,
@@ -25,6 +26,7 @@ $post_mpicc = '/bin/mpicc';
 
 $post_mpiexec = '/bin/mpiexec.hydra';
 %mpiexec = (
+    'debug', $prefix.'_debug'.$post_mpiexec,
     'opt', $prefix.'_opt'.$post_mpiexec,
     'old', $prefix.'_old'.$post_mpiexec,
     'prof', $prefix.'_prof'.$post_mpiexec,
